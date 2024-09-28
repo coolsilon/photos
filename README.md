@@ -14,13 +14,13 @@ Usage:
     ```
 4. Generate index
     ```
-    python -m photos.main
+    poetry run python -m photos.main
     ```
 6. Build frontend
     ```
-    yarn build2
+    yarn install && yarn build2
     ```
 7. Start webserver
     ```
-    fastapi run src/photos/web.py
+    poetry run fastapi run src/photos/web.py
     ```
