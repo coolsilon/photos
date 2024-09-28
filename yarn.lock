@@ -1527,6 +1527,7 @@ __metadata:
     react-bootstrap: "npm:^2.10.5"
     react-bootstrap-icons: "npm:^1.11.4"
     react-dom: "npm:^18.3.1"
+    react-photo-album: "npm:^3.0.2"
     react-redux: "npm:^9.1.2"
     react-router-dom: "npm:^6.26.2"
     typescript: "npm:^5.5.3"
@@ -2348,6 +2349,19 @@ __metadata:
   version: 3.0.4
   resolution: "react-lifecycles-compat@npm:3.0.4"
   checksum: 10c0/1d0df3c85af79df720524780f00c064d53a9dd1899d785eddb7264b378026979acbddb58a4b7e06e7d0d12aa1494fd5754562ee55d32907b15601068dae82c27
+  languageName: node
+  linkType: hard
+
+"react-photo-album@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "react-photo-album@npm:3.0.2"
+  peerDependencies:
+    "@types/react": ">=18"
+    react: ">=18"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 10c0/2c2ff12680079adde8a121bff3c26c3794f5bd64e1ca284d9a4228bb5565f9ea811dab86a9f1f4f11ce79d29dafbff331fc26dc226e2e1bbe1c49771f1cefa40
   languageName: node
   linkType: hard
 

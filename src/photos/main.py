@@ -23,7 +23,7 @@ DIM_SHORT = 720
 DIM_LONG = 960
 
 
-def input_check_is_portrait(path_input: Path) -> bool:
+def input_get_size(path_input: Path) -> tuple[int, int]:
     width, height = 0, 0
 
     if path_input.name.split(".")[-1].lower() in ("mp4", "mov"):
@@ -34,13 +34,14 @@ def input_check_is_portrait(path_input: Path) -> bool:
     else:
         width, height = Image.open(path_input).size
 
-    return width < height
+    return width, height
 
 
-def thumbnail_make(path_io: tuple[Path, Path]) -> dict[str, str | bool]:
+def thumbnail_make(path_io: tuple[Path, Path]) -> dict[str, str | bool | int]:
     path_input, path_output = path_io
 
-    is_portrait = input_check_is_portrait(path_input)
+    width, height = input_get_size(path_input)
+    is_portrait = width < height
     is_video = False
 
     if path_input.name.split(".")[-1].lower() in ("mp4", "mov"):
@@ -59,21 +60,20 @@ def thumbnail_make(path_io: tuple[Path, Path]) -> dict[str, str | bool]:
     else:
         image = Image.open(path_input)
 
-        if path_input.name == "IMG_3744.png":
-            image = image.crop((0, 972, 1170, 2532))
-        elif path_input.name == "IMG_3684.jpg":
-            image = image.crop((0, 0, 1980, 2640))
-        elif path_input.name == "IMG_7408.jpg":
-            image = image.crop((0, 0, 1980, 2640))
-
         image.thumbnail((DIM_SHORT, DIM_LONG) if is_portrait else (DIM_LONG, DIM_SHORT))
         image.save(path_output, quality=85)
+
+    width_output, height_output = input_get_size(path_output)
 
     return {
         "file": path_input.name,
         "path": str(path_input),
         "is_portrait": is_portrait,
         "is_video": is_video,
+        "width": width,
+        "height": height,
+        "width_thumbnail": width_output,
+        "height_thumbnail": height_output,
         "thumbnail": str(path_output),
     }
 
@@ -113,6 +113,7 @@ def main(path_data: Annotated[Path, typer.Option()] = Path("./data")) -> None:
                         if (
                             "mov" not in file.name.lower()
                             and "heif" not in file.name.lower()
+                            and "mp" not in file.name.lower()
                         )
                     ),
                     chunksize=50,

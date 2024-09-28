@@ -35,28 +35,6 @@ class SPAStaticFiles(StaticFiles):
                 raise ex
 
 
-def row_check_can_commit(row: list[dict[str, Any]]) -> bool:
-    count = sum(1 if photo["is_portrait"] else 10 for photo in row)
-
-    return (len(row) == 4 and (count == 4 or count == 13)) or (
-        len(row) == 3 and count == 21
-    )
-
-
-def row_check_can_append(row, incoming) -> bool:
-    result, count = False, sum(1 if photo["is_portrait"] else 10 for photo in row)
-
-    if incoming["is_portrait"]:
-        result = (len(row) < 4 and (count <= 3 or count <= 12)) or (
-            len(row) < 3 and count <= 20
-        )
-
-    else:
-        result = (len(row) < 3 and count <= 11) or (len(row) < 4 and count <= 3)
-
-    return result
-
-
 @app.get("/api/album")
 async def album_list() -> list[dict[str, str]]:
     return [
@@ -68,35 +46,28 @@ async def album_list() -> list[dict[str, str]]:
 
 @app.get("/api/album/{album_name}")
 async def photo_list(album_name: str) -> dict[str, Any]:
-    result, row, cached = {"name": album_name, "photos": []}, [], []
+    result = {"name": album_name, "photos": []}
 
     with open(Path("./data/_meta") / album_name / "index.jsonlines") as index:
         for photo in map(json.loads, index):
-            record = {
-                "name": photo["file"],
-                "photo": f"/photo/{album_name}/{photo['file']}",
-                "download": f"/download/{album_name}/{photo['file']}",
-                "thumbnail": f"/thumbnail/{album_name}/{photo['file'].split('.')[0]}.jpg",
-                "is_portrait": photo["is_portrait"],
-                "is_video": photo["is_video"],
-            }
-
-            if row_check_can_commit(cached):
-                result["photos"].append(cached)
-                cached = []
-
-            elif row_check_can_commit(row):
-                result["photos"].append(row)
-                row = cached
-                cached = []
-
-            (row if row_check_can_append(row, photo) else cached).append(record)
-
-    if row:
-        result["photos"].append(row)
-
-    if cached:
-        result["photos"].append(cached)
+            result["photos"].append(
+                {
+                    "name": photo["file"],
+                    "photo": f"/photo/{album_name}/{photo['file']}",
+                    "download": f"/download/{album_name}/{photo['file']}",
+                    "thumbnail": f"/thumbnail/{album_name}/{photo['file'].split('.')[0]}.jpg",
+                    "size_thumbnail": (
+                        photo["width_thumbnail"],
+                        photo["height_thumbnail"],
+                    ),
+                    "size": (
+                        photo["width"],
+                        photo["height"],
+                    ),
+                    "is_portrait": photo["is_portrait"],
+                    "is_video": photo["is_video"],
+                }
+            )
 
     return result
 
