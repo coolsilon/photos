@@ -21,7 +21,7 @@ These design choices prioritize simplicity and security for private photo album 
 1.  **Installation:**
 
     ```bash
-    poetry install
+    uv sync
     ```
 
 2.  **Configure Environment Variables:**
@@ -56,13 +56,13 @@ These design choices prioritize simplicity and security for private photo album 
 5.  **Generate Album Index:**
 
     ```bash
-    poetry run python -m photos.main index
+    uv python -m photos.main index
     ```
 
 6.  **Create User Account:**
 
     ```bash
-    poetry run python -m photos.main register $USERNAME
+    uv python -m photos.main register $USERNAME
     ```
 
     Follow the prompts to set up a password for the new user.
@@ -76,5 +76,5 @@ These design choices prioritize simplicity and security for private photo album 
 8.  **Start Web Server:**
 
     ```bash
-    poetry run fastapi run src/photos/web.py
+    uv uvicorn photos.web:app --reload
     ```
