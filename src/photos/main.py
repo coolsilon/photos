@@ -9,6 +9,7 @@ from typing import Annotated
 import ffmpeg
 import typer
 from dotenv import load_dotenv
+from passlib.hash import argon2
 from PIL import Image
 from pillow_heif import register_heif_opener
 from structlog import get_logger
@@ -19,8 +20,10 @@ register_heif_opener()
 
 logger = get_logger()
 
-DIM_SHORT = 720
-DIM_LONG = 960
+DIM_SHORT = 540
+DIM_LONG = 720
+
+app = typer.Typer()
 
 
 def input_get_size(path_input: Path) -> tuple[int, int]:
@@ -78,7 +81,8 @@ def thumbnail_make(path_io: tuple[Path, Path]) -> dict[str, str | bool | int]:
     }
 
 
-def main(path_data: Annotated[Path, typer.Option()] = Path("./data")) -> None:
+@app.command()
+def index(path_data: Annotated[Path, typer.Option()] = Path("./data")) -> None:
     path_meta = path_data / "_meta"
 
     with suppress(FileNotFoundError):
@@ -87,15 +91,18 @@ def main(path_data: Annotated[Path, typer.Option()] = Path("./data")) -> None:
     mkdir(path_meta)
 
     for album in scandir(path_data):
-        if path.samefile(album.path, path_meta):
+        if path.samefile(album.path, path_meta) or album.name.startswith("_"):
             continue
 
+        logger.info("Indexing album", album=album.name)
         path_meta_album = path_meta / album.name
+
         mkdir(path_meta_album)
 
-        with ProcessPoolExecutor() as executor, open(
-            path_meta_album / "index.jsonlines", "w"
-        ) as index:
+        with (
+            ProcessPoolExecutor() as executor,
+            open(path_meta_album / "index.jsonlines", "w") as index,
+        ):
             index.writelines(
                 f"{json.dumps(data)}\n"
                 for data in executor.map(
@@ -121,5 +128,37 @@ def main(path_data: Annotated[Path, typer.Option()] = Path("./data")) -> None:
             )
 
 
+@app.command()
+def register(
+    name: Annotated[str, typer.Argument()],
+    path_data: Annotated[Path, typer.Option()] = Path("./data"),
+):
+    path_db = path_data / "_db"
+    path_db_user = path_db / "users.json"
+
+    if not path_db.exists():
+        mkdir(path_db)
+
+    if not path_db_user.exists():
+        with open(path_db_user, "w") as file:
+            file.write("{}")
+
+    logger.info("Loading users")
+    db = {}
+    with open(path_db_user, "r") as file:
+        db = json.load(file)
+
+    password = typer.prompt("Enter password", hide_input=True)
+
+    if password != typer.prompt("Confirm password", hide_input=True):
+        print("Bad password")
+        return
+
+    db[name] = {"password": argon2.hash(password)}
+
+    with open(path_db_user, "w") as file:
+        json.dump(db, file)
+
+
 if __name__ == "__main__":
-    typer.run(main)
+    app()

@@ -27,7 +27,7 @@ export default function Album() {
 
 	return (
 		<>
-			<h1>{album.name}</h1>
+			<h1>{album.display}</h1>
 			<Lightbox
 				open={photo_show !== undefined}
 				close={() => setShow(undefined)}
