@@ -26,15 +26,13 @@ These design choices prioritize simplicity and security for private photo album 
 
 2.  **Configure Environment Variables:**
 
-    Create a `.env` file in the project's root directory to set up user authentication and album URL.
+    Initialize the environment variables
 
-    ```bash
-    JWT_SECRET_KEY=$YOUR_RANDOM_SECRET_STRING
-    ALBUM_URL=$YOUR_ALBUM_BASE_URL
+    ```
+    uv run python -m photos.main init
     ```
 
-    * **`JWT_SECRET_KEY`:** Generate a strong, random string. This secret key is used to sign JSON Web Tokens (JWTs) for user authentication.
-    * **`ALBUM_URL`:** Set the base URL where your photo albums will be accessible. For example, `http://localhost:8000/albums/`.
+    Answer the prompt to setup the running environment
 
 3.  **Create Data Directory:**
 
@@ -56,13 +54,13 @@ These design choices prioritize simplicity and security for private photo album 
 5.  **Generate Album Index:**
 
     ```bash
-    uv python -m photos.main index
+    uv run python -m photos.main index
     ```
 
 6.  **Create User Account:**
 
     ```bash
-    uv python -m photos.main register $USERNAME
+    uv run python -m photos.main register $USERNAME
     ```
 
     Follow the prompts to set up a password for the new user.

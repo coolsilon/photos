@@ -1,4 +1,5 @@
 import json
+import secrets
 from concurrent.futures import ProcessPoolExecutor
 from contextlib import suppress
 from os import mkdir, path, scandir
@@ -158,6 +159,17 @@ def register(
 
     with open(path_db_user, "w") as file:
         json.dump(db, file)
+
+
+@app.command()
+def init():
+    path_env = Path(".env")
+
+    with open(path_env, "w") as file:
+        file.write(f"JWT_SECRET_KEY={secrets.token_hex(64)}\n")
+        file.write(
+            f"ALBUM_URL={typer.prompt('The web address of the album').rstrip('/')}\n"
+        )
 
 
 if __name__ == "__main__":
